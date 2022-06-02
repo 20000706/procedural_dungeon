@@ -4,66 +4,81 @@ using UnityEngine;
 
 public class EnemyAI : MonoBehaviour
 {
-    public float moveSpeed = 3f;
-    public float rotSpeed = 100f;
-
-    private bool isWandering = false;
-    private bool isRotatingLeft = false;
-    private bool isRotatingRight = false;
-    private bool isWalking = false;
+    public float moveSpeed = 2f;
+    public Rigidbody rb;
+    public string heading;
+    private List<string> direcs = new List<string>{ "F", "B", "L", "R"};
+    
 
     void Start()
     {
-        
+        rb = GetComponent<Rigidbody>();
+        heading = direcs[Random.Range(0, 3)];
+        if (rb.velocity.magnitude <= 0.01f)
+        {
+            StartCoroutine("Wait");
+        }
     }
+
+    void OnCollisionEnter(Collision collision)
+        {
+            heading = direcs[Random.Range(0, 3)];
+        }
 
     void Update()
-    {
-        if (isWandering == false)
+    {   
+        if (heading == "F") 
         {
-            StartCoroutine(Wander());
+            rb.velocity = new Vector3(0, 0, 1) * moveSpeed;
         }
-        if (isRotatingRight == true)
+        if (heading == "B") 
         {
-            transform.Rotate(transform.up * Time.deltaTime * rotSpeed);
+            rb.velocity = new Vector3(0, 0, -1) * moveSpeed;
         }
-        if (isRotatingLeft == true)
+        if (heading == "L") 
         {
-            transform.Rotate(transform.up * Time.deltaTime * -rotSpeed);
+            rb.velocity = new Vector3(-1, 0, 0) * moveSpeed;
         }
-        if (isWalking == true)
+        if (heading == "R")
         {
-            transform.position += transform.forward * moveSpeed * Time.deltaTime;
+            rb.velocity = new Vector3(1, 0, 0) * moveSpeed;
         }
     }
 
-    IEnumerator Wander()
+    IEnumerator Wait()
+    {  
+        while (true)
+        {
+            yield return new WaitForSeconds(3);
+            ChangeDirec();
+        }
+    }
+
+    void ChangeDirec()
     {
-        int rotTime = Random.Range(1, 3);
-        int rotateWait = Random.Range(1, 3);
-        int rotateLorR = Random.Range(0, 3);
-        int walkWait = Random.Range(1, 3);
-        int walkTime = Random.Range(1, 5);
-
-        isWandering = true;
-
-        yield return new WaitForSeconds(walkWait);
-        isWalking = true;
-        yield return new WaitForSeconds(walkTime);
-        isWalking = false;
-        yield return new WaitForSeconds(rotateWait);
-        if (rotateLorR == 1)
+        if (heading == direcs[0])
         {
-            isRotatingRight = true;
-            yield return new WaitForSeconds(rotTime);
-            isRotatingLeft = false;
+            List<string> exceptF = new List<string>(direcs);
+            exceptF.Remove("F");
+            heading = exceptF[Random.Range(0, 2)];
         }
-        if (rotateLorR == 2)
+        if (heading == direcs[1])
         {
-            isRotatingLeft = true;
-            yield return new WaitForSeconds(rotTime);
-            isRotatingRight = false;
+            List<string> exceptB = new List<string>(direcs);
+            exceptB.Remove("B");
+            heading = exceptB[Random.Range(0, 2)];
         }
-        isWandering = false;
+        if (heading == direcs[2])
+        {
+            List<string> exceptL = new List<string>(direcs);
+            exceptL.Remove("L");
+            heading = exceptL[Random.Range(0, 2)];
+        }
+        if (heading == direcs[3])
+        {
+            List<string> exceptR = new List<string>(direcs);
+            exceptR.Remove("R");
+            heading = exceptR[Random.Range(0, 2)];
+        }
     }
 }
